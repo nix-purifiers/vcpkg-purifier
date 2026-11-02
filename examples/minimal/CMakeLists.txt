@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(purifier_example C)
+find_package(ZLIB REQUIRED)
+add_executable(hello main.c)
+target_link_libraries(hello PRIVATE ZLIB::ZLIB)
+enable_testing()
+add_test(NAME locked_zlib COMMAND hello)
+install(TARGETS hello RUNTIME DESTINATION bin)

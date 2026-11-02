@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.log
+result
+cli-native
+.vcpkg-purifier/
+vcpkg_installed/
+build/

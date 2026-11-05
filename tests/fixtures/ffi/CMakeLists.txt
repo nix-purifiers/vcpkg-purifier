@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(foreign_proof C)
+find_package(ZLIB REQUIRED)
+add_library(proof SHARED proof.c)
+target_link_libraries(proof PRIVATE ZLIB::ZLIB)
+install(TARGETS proof LIBRARY DESTINATION lib)
+install(FILES proof.h DESTINATION include)

@@ -8,6 +8,7 @@
   native,
   toolchain,
   purifier,
+  stdenv,
   gnutar,
   gzip,
 }:
@@ -16,6 +17,11 @@
   lockFile ? src + "/vcpkg-purifier.lock.json",
   vcpkgLock ? src + "/vcpkg-lock.json",
   fetchers ? { },
+  nativeLibraries ? { },
+  nativeIncludeDirectories ? [ ],
+  resourceRoots ? { },
+  resourceDependencies ? [ ],
+  resourceSchema ? null,
   cmakeFlags ? [ ],
   buildTargets ? [ ],
   test ? true,
@@ -52,7 +58,7 @@ let
     inherit src;
     filter = srcFilter;
   };
-  project =
+  builtProject =
     runCommand "purified-vcpkg-project"
       {
         nativeBuildInputs = [
@@ -88,6 +94,29 @@ let
             ${lib.optionalString test "ctest --test-dir build --output-on-failure"}
             cmake --install build
       '';
+  projections =
+    lib.optionalAttrs (nativeLibraries != { }) (
+      purifier.nativeProjections {
+        producer = builtProject;
+        libraries = nativeLibraries;
+        includeDirectories = nativeIncludeDirectories;
+        system = stdenv.hostPlatform.system;
+        targetMetadata.tool = "vcpkg";
+        inherit runCommand python3;
+      }
+    )
+    // lib.optionalAttrs (resourceRoots != { }) (
+      purifier.resourceProjections {
+        producer = builtProject;
+        roots = resourceRoots;
+        dependencies = resourceDependencies;
+        schema = resourceSchema;
+        inherit runCommand python3;
+      }
+    );
+  project = builtProject // {
+    inherit projections;
+  };
   release =
     assert lock.problems == [ ];
     runCommand "vcpkg-project-release"
@@ -112,6 +141,6 @@ in
     default = project;
   };
   tests = project;
-  inherit release;
+  inherit release projections;
   fetches = lock.entries;
 }

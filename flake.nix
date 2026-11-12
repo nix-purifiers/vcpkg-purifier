@@ -44,11 +44,11 @@
               final.patch
             ];
           };
-          cli = scope.callPackage ./nix/cli.nix {
+          cli = scope.callPackage ./pkgs/vcpkg-purifier/default.nix {
             nixpkgsSrc = nixpkgs;
             purifierSrc = purifier;
           };
-          buildVcpkgProject = scope.callPackage ./nix/build-project.nix { purifier = shared final.lib; };
+          buildVcpkgProject = scope.callPackage ./pkgs/build-vcpkg-project/default.nix { purifier = shared final.lib; };
         });
       };
       pkgsFor =
@@ -60,7 +60,7 @@
     in
     {
       overlays.default = overlay;
-      lib.vcpkg-purifier.readLock = import ./nix/read-lock.nix { lib = nixpkgs.lib; };
+      lib.vcpkg-purifier = import ./lib-overlays/default { lib = nixpkgs.lib; };
       packages = forAll (system: {
         default = (pkgsFor system).vcpkg-purifier.cli;
         cli = self.packages.${system}.default;

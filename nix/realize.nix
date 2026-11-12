@@ -36,13 +36,13 @@ let
     lockFile = /. + lockFile;
     vcpkgLock = /. + vcpkgLock;
   };
-  lock = import ./read-lock.nix { inherit (pkgs) lib; } args;
+  lock = import ../lib-overlays/default/read-lock.nix { inherit (pkgs) lib; } args;
 in
 if target == "environment" then
-  pkgs.callPackage ./environment.nix { inherit purifier native toolchain; } { inherit lock; }
+  pkgs.callPackage ../pkgs/build-vcpkg-project/environment.nix { inherit purifier native toolchain; } { inherit lock; }
 else if target == "runtime" then
   pkgs.runCommand "vcpkg-purifier-runtime" { } ''ln -s @runtime@ "$out"''
 else if target == "release" then
-  (pkgs.callPackage ./build-project.nix { inherit purifier native toolchain; } args).release
+  (pkgs.callPackage ../pkgs/build-vcpkg-project/default.nix { inherit purifier native toolchain; } args).release
 else
   throw "vcpkg-purifier: unknown realization target ${target}"

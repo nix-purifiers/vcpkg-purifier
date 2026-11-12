@@ -17,12 +17,12 @@
 stdenvNoCC.mkDerivation {
   pname = "vcpkg-purifier";
   version = "0.1.0";
-  src = ../.;
+  src = ../..;
   nativeBuildInputs = [ makeWrapper ];
   dontBuild = true;
   installPhase = ''
     mkdir -p "$out/bin" "$out/lib/vcpkg-purifier"
-    cp -r vcpkg_purifier nix "$out/lib/vcpkg-purifier/"
+    cp -r vcpkg_purifier nix lib-overlays pkgs "$out/lib/vcpkg-purifier/"
     install -m755 bin/vcpkg-purifier "$out/bin/vcpkg-purifier"
     substituteInPlace "$out/lib/vcpkg-purifier/nix/realize.nix" \
       --replace-fail '@nixpkgs@' '${nixpkgsSrc}' \
